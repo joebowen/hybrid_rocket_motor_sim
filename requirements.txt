@@ -1,0 +1,5 @@
+pint
+pandas
+thermo
+matplotlib
+fpdf
