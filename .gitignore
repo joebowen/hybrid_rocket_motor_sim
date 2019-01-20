@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # pandas
-pandas/_libs/*
+pandas/_libs/
