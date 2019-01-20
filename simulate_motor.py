@@ -19,7 +19,7 @@ external_temp = constants.ureg.Quantity(85, constants.ureg.degF)
 initial_port_diameter = 1.2 * constants.ureg.inches
 port_length = 15 * constants.ureg.inches
 
-time_step = .001 * constants.ureg.sec
+time_step = .01 * constants.ureg.sec
 
 pd.set_option('display.max_columns', 500)
 
@@ -138,14 +138,16 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
         pdf.write(5, 'Motor: {}{}\n'.format(motor_code, int(round(average_trust))))
 
         nozzle_results = {
-            'nozzle_throat_dia_avg': data['nozzle throat diameter (inch)'].iloc[:-2].mean(),
-            'nozzle_exit_dia_avg': data['nozzle exit diameter (inch)'].iloc[:-2].mean(),
-            'nozzle_diffuser_len_avg': data['nozzle nozzle diffuser length (inch)'].iloc[:-2].mean()
+            'nozzle_throat_dia_avg': data['nozzle throat diameter (inch)'].iloc[:-2].mean() * constants.ureg.inches,
+            'nozzle_exit_dia_avg': data['nozzle exit diameter (inch)'].iloc[:-2].mean() * constants.ureg.inches,
+            'nozzle_diffuser_len_avg': data['nozzle nozzle diffuser length (inch)'].iloc[:-2].mean() * constants.ureg.inches
         }
 
-        pdf.write(5, 'Suggested Throat Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_throat_dia_avg'])))
-        pdf.write(5, 'Suggested Exit Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_exit_dia_avg'])))
-        pdf.write(5, 'Suggested Diffuser Length: {} (inch)\n'.format(round(nozzle_results['nozzle_diffuser_len_avg'])))
+        pdf.write(10, 'Nozzle Results:\n')
+
+        pdf.write(5, 'Suggested Throat Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_throat_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
+        pdf.write(5, 'Suggested Exit Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_exit_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
+        pdf.write(5, 'Suggested Diffuser Length: {} (inch)\n'.format(round(nozzle_results['nozzle_diffuser_len_avg'].to(constants.ureg.inches).magnitude, 3)))
 
         for column in data.columns.values:
             fig = data.plot(
