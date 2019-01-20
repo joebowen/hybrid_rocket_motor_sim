@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # pandas
-*hashtable_class_helper.pxi
+hashtable_class_helper.pxi
