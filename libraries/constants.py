@@ -9,7 +9,9 @@ nozzle_angle = 15 * ureg.degree
 
 P_exit = (1 * ureg.atmosphere).to_base_units()
 
-injector_mass_flow_rate = 0.15 * ureg.kg / ureg.sec
+# Currently based on average ofRattWorks H70, I80, and I90 (N20 weight / burntime)
+injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
+
 num_of_injectors = 1
 grain_diameter = 1.75 * ureg.inches
 
@@ -20,7 +22,20 @@ m = -0.2
 fuel_density = 3.957 * ureg.kg / (ureg.m ** 3)
 
 n2o_density = {
-    85: 764.97 * ureg.kg / (ureg.m ** 3)
+    20: 948.3 * ureg.kg / (ureg.m ** 3),
+    32: 913.1 * ureg.kg / (ureg.m ** 3),
+    40: 876.2 * ureg.kg / (ureg.m ** 3),
+    45: 857.0 * ureg.kg / (ureg.m ** 3),
+    50: 837.8 * ureg.kg / (ureg.m ** 3),
+    55: 813.7 * ureg.kg / (ureg.m ** 3),
+    60: 788.1 * ureg.kg / (ureg.m ** 3),
+    65: 767.3 * ureg.kg / (ureg.m ** 3),
+    70: 744.9 * ureg.kg / (ureg.m ** 3),
+    75: 704.8 * ureg.kg / (ureg.m ** 3),
+    80: 656.8 * ureg.kg / (ureg.m ** 3),
+    85: 608.7 * ureg.kg / (ureg.m ** 3),
+    90: 544.6 * ureg.kg / (ureg.m ** 3),
+    97: 424.5 * ureg.kg / (ureg.m ** 3)
 }
 
 ideal_OF_ratio = 4.83
@@ -70,8 +85,8 @@ def diameter_to_area(diameter):
 
     return area
 
-post_chamber_dia = 1.75 * ureg.inches
+post_chamber_dia = 1.5 * ureg.inches
 post_chamber_area = diameter_to_area(post_chamber_dia)
 
-inlet_dia = 1.75 * ureg.inches
+inlet_dia = 1.5 * ureg.inches
 inlet_area = diameter_to_area(inlet_dia)

@@ -7,16 +7,21 @@ from libraries.thermodynamic import Thermodynamic
 
 
 class Nozzle:
-    def __init__(self, mixture, nozzle_throat_dia, nozzle_exit_dia, nozzle_diffuser_len):
+    def __init__(self, mixture, nozzle_dims):
         self.original_mixture = mixture
 
         self.combustion_thermo = Thermodynamic(copy.deepcopy(mixture))
         self.star_thermo = Thermodynamic(copy.deepcopy(mixture))
         self.exit_thermo = Thermodynamic(copy.deepcopy(mixture))
 
-        self.throat_dia = nozzle_throat_dia
-        self.exit_dia = nozzle_exit_dia
-        self.diffuser_len = nozzle_diffuser_len
+        if nozzle_dims:
+            self.throat_dia = nozzle_dims['nozzle_throat_dia_avg']
+            self.exit_dia = nozzle_dims['nozzle_exit_dia_avg']
+            self.diffuser_len = nozzle_dims['nozzle_diffuser_len_avg']
+
+            self.ideal = False
+        else:
+            self.ideal = True
 
     def inlet_velocity(self, total_mass_flow_rate):
         """inlet_velocity = total_mass_flow_rate / (total_inlet_density * post_chamber_area)
@@ -58,7 +63,7 @@ class Nozzle:
         return throat_area
 
     def throat_diameter(self, total_mass_flow_rate):
-        if self.throat_dia:
+        if not self.ideal:
             throat_diameter = self.throat_dia
         else:
             throat_diameter = constants.area_to_diameter(self.throat_area(total_mass_flow_rate))
@@ -183,7 +188,7 @@ class Nozzle:
         return exit_area
 
     def exit_diameter(self, total_mass_flow_rate):
-        if self.exit_dia:
+        if not self.ideal:
             exit_diameter = self.exit_dia
         else:
             exit_diameter = constants.area_to_diameter(self.exit_area(total_mass_flow_rate))
@@ -193,7 +198,7 @@ class Nozzle:
     def nozzle_diffuser_length(self, total_mass_flow_rate):
         """nozzle_diffuser_length = (exit_diameter - throat_diameter) / (2 * tan(nozzle_angle))
         """
-        if self.diffuser_len:
+        if not self.ideal:
             nozzle_diffuser_length = self.diffuser_len
         else:
             nozzle_diffuser_length = (

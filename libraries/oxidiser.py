@@ -18,4 +18,4 @@ class Oxidiser:
         return self.mass_flow_rate
         
     def n2o_density(self, external_temp):    
-        return constants.n2o_density[external_temp.magnitude]
+        return constants.n2o_density[external_temp.to(constants.ureg.degF).magnitude]

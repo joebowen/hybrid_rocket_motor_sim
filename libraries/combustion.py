@@ -13,12 +13,14 @@ class Combustion:
         self.average_total_mass_flow_rate = self.oxidiser.mass_flow_rate_function()
 
     def solve_for_average_total_mass_flow_rate(self, iteration_precision):
-        self.average_total_mass_flow_rate = self.oxidiser.mass_flow_rate_function()
+        oxi_mass_flow_rate = self.oxidiser.mass_flow_rate_function()
+
+        self.average_total_mass_flow_rate = oxi_mass_flow_rate
 
         temp_average_total_mass_flow_rate = self.average_total_mass_flow_rate
 
         while True:
-            self.average_total_mass_flow_rate = self.average_fuel_mass_flow_rate_function() + self.oxidiser.mass_flow_rate_function()
+            self.average_total_mass_flow_rate = self.average_fuel_mass_flow_rate_function() + oxi_mass_flow_rate
 
             if abs(self.average_total_mass_flow_rate - temp_average_total_mass_flow_rate).magnitude < iteration_precision:
                 break
@@ -28,7 +30,8 @@ class Combustion:
         self.average_port_diameter += 2 * self.average_regression_rate * self.time_step / 100
 
         if self.average_port_diameter.to_base_units().magnitude > constants.grain_diameter.to_base_units().magnitude:
-            raise ValueError
+            print('Motor burn through! Fuel grain too thin!')
+            raise ValueError('Motor burn through! Fuel grain too thin!')
 
         return self.average_total_mass_flow_rate
 

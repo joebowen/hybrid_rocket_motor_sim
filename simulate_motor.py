@@ -12,11 +12,10 @@ from libraries.oxidiser import Oxidiser
 from libraries.nozzle import Nozzle
 from libraries.thermochemical import Thermochemical
 
-initial_oxidiser_volume = 1 * constants.ureg.L
+initial_oxidiser_volume = 0.4139 * constants.ureg.L
 
-external_temp = constants.ureg.Quantity(85, constants.ureg.degF)
+initial_port_diameter = 1.0 * constants.ureg.inches
 
-initial_port_diameter = 1.2 * constants.ureg.inches
 port_length = 15 * constants.ureg.inches
 
 time_step = .01 * constants.ureg.sec
@@ -24,11 +23,11 @@ time_step = .01 * constants.ureg.sec
 pd.set_option('display.max_columns', 500)
 
 
-def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_diffuser_len=None):
+def simulate(ideal, external_temp, nozzle_dims=None):
     oxidiser = Oxidiser(initial_oxidiser_volume, external_temp, time_step)
     combustion = Combustion(initial_port_diameter, port_length, oxidiser, time_step)
     thermochemical = Thermochemical()
-    nozzle = Nozzle(thermochemical.get_mixture(), nozzle_throat_dia, nozzle_exit_dia, nozzle_diffuser_len)
+    nozzle = Nozzle(thermochemical.get_mixture(), nozzle_dims)
     
     time = 0 * constants.ureg.sec
 
@@ -47,12 +46,13 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
             raw_data.append(
                 {
                     'time ({0.units})'.format(time.to_base_units()): time.to_base_units().magnitude,
-                    'average total mass flow rate ({0.units})'.format(average_total_mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second)):round(average_total_mass_flow_rate.to(constants.ureg.lbs / constants.ureg.seconds).magnitude, 3),
+                    'average total mass flow rate ({0.units})'.format(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)):round(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.seconds).magnitude, 3),
                     'average port diameter ({0.units})'.format(combustion.average_port_diameter.to(constants.ureg.inches)): round(combustion.average_port_diameter.to(constants.ureg.inches).magnitude, 4),
                     'average regression rate ({0.units})'.format(combustion.average_regression_rate.to(constants.ureg.inches / constants.ureg.second)): round(combustion.average_regression_rate.to(constants.ureg.inches / constants.ureg.second).magnitude / 100, 5),
-                    'average fuel mass flow rate ({0.units})'.format(combustion.average_fuel_mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second)): round(combustion.average_fuel_mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second).magnitude, 7),
-                    'oxidiser mass flow rate ({0.units})'.format(oxidiser.mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second)): round(oxidiser.mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second).magnitude, 4),
-                    'average total mass flux ({0.units})'.format(combustion.average_total_mass_flux.to(constants.ureg.lbs / ((constants.ureg.inches **2) * constants.ureg.second))): round(combustion.average_total_mass_flux.to(constants.ureg.lbs / ((constants.ureg.inches **2) * constants.ureg.second)).magnitude, 4),
+                    'average fuel mass flow rate ({0.units})'.format(combustion.average_fuel_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)): round(combustion.average_fuel_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second).magnitude, 7),
+                    'oxidiser mass ({0.units})'.format(oxidiser.mass.to(constants.ureg.kg)): round(oxidiser.mass.to(constants.ureg.kg).magnitude, 4),
+                    'oxidiser mass flow rate ({0.units})'.format(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)): round(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second).magnitude, 4),
+                    'average total mass flux ({0.units})'.format(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second))): round(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second)).magnitude, 4),
                     'oxi fuel ratio': round(combustion.oxi_fuel_ratio_function().to_base_units().magnitude, 4),
                     'inlet velocity ({0.units})'.format(nozzle.inlet_velocity(average_total_mass_flow_rate).to(constants.ureg.mph)): round(nozzle.inlet_velocity(average_total_mass_flow_rate).to(constants.ureg.mph).magnitude, 4),
                     'inlet mach': round(nozzle.inlet_mach(average_total_mass_flow_rate).magnitude, 4),
@@ -78,7 +78,7 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
 
             count += 1
     except Exception as e:
-        print(e)
+        print('Error: {}'.format(e))
 
         raise e
     finally:
@@ -90,7 +90,10 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
             inplace=True
         )
 
-        data.to_csv('results/motor_data.csv')
+        if ideal:
+            data.to_csv('results/ideal_nozzle_{}F_motor_data.csv'.format(external_temp.to(constants.ureg.degF).magnitude))
+        else:
+            data.to_csv('results/suggested_nozzle_{}F_motor_data.csv'.format(external_temp.to(constants.ureg.degF).magnitude))
 
         pdf = FPDF()
 
@@ -103,28 +106,32 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
         else:
             pdf.write(10, 'Suggested Nozzle Simulation Inputs:\n')
 
-        pdf.write(5, 'a: {0:.4f}\n'.format(constants.a.to((constants.ureg.inches ** 2)/constants.ureg.lbs)))
+        pdf.write(5, 'a: {0:.2f}\n'.format(constants.a.to((constants.ureg.m ** 2)/constants.ureg.kg)))
         pdf.write(5, 'n: {}\n'.format(constants.n))
         pdf.write(5, 'm: {}\n'.format(constants.m))
         
-        pdf.write(5, 'Initial Oxidiser Volume: {}\n'.format(initial_oxidiser_volume.to(constants.ureg.liter)))
-        pdf.write(5, 'External Temp: {}\n'.format(external_temp.to(constants.ureg.degF)))
+        pdf.write(5, '\nOxidiser:\n\n')
 
-        pdf.write(5, 'Grain Diameter: {0:.4f}\n'.format(constants.grain_diameter.to(constants.ureg.inches)))
-        pdf.write(5, 'Initial Port Diameter: {}\n'.format(initial_port_diameter.to(constants.ureg.inches)))
-        pdf.write(5, 'Port Length: {}\n'.format(port_length.to(constants.ureg.inches)))
-        pdf.write(5, 'Fuel Density: {0:.6f}\n'.format(constants.fuel_density.to(constants.ureg.lbs / (constants.ureg.inches ** 3))))
-        
-        pdf.write(5, 'Injector Mass Flow Rate: {0:.4f}\n'.format(constants.injector_mass_flow_rate.to(constants.ureg.lbs / constants.ureg.second)))
+        pdf.write(5, 'Initial Volume: {0:.2f}\n'.format(initial_oxidiser_volume.to(constants.ureg.liter)))
+
+        oxidiser_density = constants.n2o_density[external_temp.to(constants.ureg.degF).magnitude]
+
+        initial_oxi_mass = initial_oxidiser_volume * oxidiser_density
+
+        pdf.write(5, 'Initial Mass: {} lbs\n\n'.format(round(initial_oxi_mass.to(constants.ureg.lb).magnitude, 2)))
+              
+        pdf.write(5, 'Injector Mass Flow Rate: {0:.3f}\n'.format(constants.injector_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)))
         pdf.write(5, 'Number of Injectors: {}\n'.format(constants.num_of_injectors))
-        
+
         pdf.write(5, 'Ideal O/F Ratio: {}\n'.format(constants.ideal_OF_ratio))
+
+        pdf.write(5, 'External Temp: {}\n'.format(external_temp.to(constants.ureg.degF)))
 
         pdf.write(5, 'Time Step: {}\n'.format(time_step.to_base_units()))
 
-        pdf.write(10, 'Simulation Results:\n')
+        pdf.write(5, '\nSimulation Results:\n\n')
 
-        pdf.write(5, 'Total Burn Time: {}\n'.format(round(time, 3)))
+        pdf.write(5, 'Total Burn Time: {}\n\n'.format(round(time, 3)))
         pdf.write(5, 'Impulse: {}\n'.format(round(impulse, 2)))
 
         average_trust = data['nozzle thrust (newton)'].mean()
@@ -132,8 +139,6 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
         pdf.write(5, 'Average Thrust: {} newton\n'.format(round(average_trust, 2)))
 
         motor_code = constants.get_motor_code(impulse)
-
-        pdf.write(5, 'Motor Code: {}\n'.format(motor_code))
 
         pdf.write(5, 'Motor: {}{}\n'.format(motor_code, int(round(average_trust))))
 
@@ -143,11 +148,20 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
             'nozzle_diffuser_len_avg': data['nozzle nozzle diffuser length (inch)'].iloc[:-2].mean() * constants.ureg.inches
         }
 
-        pdf.write(10, 'Nozzle Results:\n')
+        pdf.write(5, '\nNozzle Results:\n\n')
 
-        pdf.write(5, 'Suggested Throat Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_throat_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
-        pdf.write(5, 'Suggested Exit Diameter: {} (inch)\n'.format(round(nozzle_results['nozzle_exit_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
-        pdf.write(5, 'Suggested Diffuser Length: {} (inch)\n'.format(round(nozzle_results['nozzle_diffuser_len_avg'].to(constants.ureg.inches).magnitude, 3)))
+        pdf.write(5, 'Suggested Throat Diameter: {} inch\n'.format(round(nozzle_results['nozzle_throat_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
+        pdf.write(5, 'Suggested Exit Diameter: {} inch\n'.format(round(nozzle_results['nozzle_exit_dia_avg'].to(constants.ureg.inches).magnitude, 3)))
+        pdf.write(5, 'Suggested Diffuser Length: {} inch\n'.format(round(nozzle_results['nozzle_diffuser_len_avg'].to(constants.ureg.inches).magnitude, 3)))
+
+        pdf.write(5, '\nFuel Grain\n\n')
+
+        pdf.write(5, 'Port Length: {}\n'.format(port_length.to(constants.ureg.inches)))
+        pdf.write(5, 'Fuel Density: {0:.2f}\n'.format(constants.fuel_density.to(constants.ureg.kg / (constants.ureg.m ** 3))))
+
+        pdf.write(5, '\nGrain Diameter: {0:.2f}\n'.format(round(constants.grain_diameter.to(constants.ureg.inches), 3)))
+        pdf.write(5, 'Initial Port Diameter: {}\n'.format(initial_port_diameter.to(constants.ureg.inches)))
+        pdf.write(5, 'Final Port Diameter: {} inch\n'.format(round(data['average port diameter (inch)'].iloc[-1], 3)))
 
         for column in data.columns.values:
             fig = data.plot(
@@ -167,19 +181,26 @@ def simulate(ideal=True, nozzle_throat_dia=None, nozzle_exit_dia=None, nozzle_di
             pdf.image('results/images/' + filename + '.png')
 
         if ideal:
-            pdf.output('results/ideal_results.pdf', 'F')
+            pdf.output('results/ideal_nozzle_{}F_results.pdf'.format(external_temp.to(constants.ureg.degF).magnitude), 'F')
         else:
-            pdf.output('results/suggested_results.pdf', 'F')
+            pdf.output('results/suggested_nozzle_{}F_results.pdf'.format(external_temp.to(constants.ureg.degF).magnitude), 'F')
 
         return nozzle_results
 
 
 if __name__ == "__main__":
-    nozzle_suggestion = simulate()
+    external_temp = constants.ureg.Quantity(70, constants.ureg.degF)
 
-    simulate(
-        ideal=False,
-        nozzle_throat_dia=nozzle_suggestion['nozzle_throat_dia_avg'],
-        nozzle_exit_dia=nozzle_suggestion['nozzle_exit_dia_avg'],
-        nozzle_diffuser_len=nozzle_suggestion['nozzle_diffuser_len_avg']
+    nozzle_suggestion = simulate(
+        ideal=True,
+        external_temp=external_temp
     )
+
+    # for temp in constants.n2o_density.keys():
+    #     external_temp = constants.ureg.Quantity(temp, constants.ureg.degF)
+
+    #     simulate(
+    #         ideal=False,
+    #         external_temp=external_temp,
+    #         nozzle_dims=nozzle_suggestion
+    #     )
