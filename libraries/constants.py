@@ -9,6 +9,16 @@ nozzle_angle = 15 * ureg.degree
 
 P_exit = (1 * ureg.atmosphere).to_base_units()
 
+initial_oxidiser_volume = 0.4139 * ureg.L
+
+initial_port_diameter = 1.0 * ureg.inches
+
+port_length = 13.4 * ureg.inches
+
+inlet_dia = 1.45 * ureg.inches 
+
+time_step = .01 * ureg.sec
+
 # Currently based on average ofRattWorks H70, I80, and I90 (N20 weight / burntime)
 injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
 
@@ -85,8 +95,4 @@ def diameter_to_area(diameter):
 
     return area
 
-post_chamber_dia = 1.5 * ureg.inches
-post_chamber_area = diameter_to_area(post_chamber_dia)
-
-inlet_dia = 1.5 * ureg.inches
 inlet_area = diameter_to_area(inlet_dia)

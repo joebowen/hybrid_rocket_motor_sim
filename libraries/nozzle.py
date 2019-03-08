@@ -7,27 +7,18 @@ from libraries.thermodynamic import Thermodynamic
 
 
 class Nozzle:
-    def __init__(self, mixture, nozzle_dims):
+    def __init__(self, mixture):
         self.original_mixture = mixture
 
         self.combustion_thermo = Thermodynamic(copy.deepcopy(mixture))
         self.star_thermo = Thermodynamic(copy.deepcopy(mixture))
         self.exit_thermo = Thermodynamic(copy.deepcopy(mixture))
 
-        if nozzle_dims:
-            self.throat_dia = nozzle_dims['nozzle_throat_dia_avg']
-            self.exit_dia = nozzle_dims['nozzle_exit_dia_avg']
-            self.diffuser_len = nozzle_dims['nozzle_diffuser_len_avg']
-
-            self.ideal = False
-        else:
-            self.ideal = True
-
     def inlet_velocity(self, total_mass_flow_rate):
-        """inlet_velocity = total_mass_flow_rate / (total_inlet_density * post_chamber_area)
+        """inlet_velocity = total_mass_flow_rate / (total_inlet_density * inlet_area)
         """
     
-        inlet_velocity = total_mass_flow_rate / (self.combustion_thermo.density() * constants.post_chamber_area)
+        inlet_velocity = total_mass_flow_rate / (self.combustion_thermo.density() * constants.inlet_area)
 
         return inlet_velocity
 
@@ -63,10 +54,7 @@ class Nozzle:
         return throat_area
 
     def throat_diameter(self, total_mass_flow_rate):
-        if not self.ideal:
-            throat_diameter = self.throat_dia
-        else:
-            throat_diameter = constants.area_to_diameter(self.throat_area(total_mass_flow_rate))
+        throat_diameter = constants.area_to_diameter(self.throat_area(total_mass_flow_rate))
 
         return throat_diameter
 
@@ -188,27 +176,21 @@ class Nozzle:
         return exit_area
 
     def exit_diameter(self, total_mass_flow_rate):
-        if not self.ideal:
-            exit_diameter = self.exit_dia
-        else:
-            exit_diameter = constants.area_to_diameter(self.exit_area(total_mass_flow_rate))
+        exit_diameter = constants.area_to_diameter(self.exit_area(total_mass_flow_rate))
 
         return exit_diameter
 
     def nozzle_diffuser_length(self, total_mass_flow_rate):
         """nozzle_diffuser_length = (exit_diameter - throat_diameter) / (2 * tan(nozzle_angle))
         """
-        if not self.ideal:
-            nozzle_diffuser_length = self.diffuser_len
-        else:
-            nozzle_diffuser_length = (
-                (
-                    self.exit_diameter(total_mass_flow_rate) - self.throat_diameter(total_mass_flow_rate)
-                ) / 
-                (
-                    2 * math.tan(constants.nozzle_angle)
-                )
+        nozzle_diffuser_length = (
+            (
+                self.exit_diameter(total_mass_flow_rate) - self.throat_diameter(total_mass_flow_rate)
+            ) / 
+            (
+                2 * math.tan(constants.nozzle_angle)
             )
+        )
 
         return nozzle_diffuser_length
 

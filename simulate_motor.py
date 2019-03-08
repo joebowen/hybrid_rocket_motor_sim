@@ -12,22 +12,13 @@ from libraries.oxidiser import Oxidiser
 from libraries.nozzle import Nozzle
 from libraries.thermochemical import Thermochemical
 
-initial_oxidiser_volume = 0.4139 * constants.ureg.L
-
-initial_port_diameter = 1.0 * constants.ureg.inches
-
-port_length = 15 * constants.ureg.inches
-
-time_step = .01 * constants.ureg.sec
-
 pd.set_option('display.max_columns', 500)
 
-
-def simulate(ideal, external_temp, nozzle_dims=None):
-    oxidiser = Oxidiser(initial_oxidiser_volume, external_temp, time_step)
-    combustion = Combustion(initial_port_diameter, port_length, oxidiser, time_step)
+def simulate(ideal, external_temp):
+    oxidiser = Oxidiser(external_temp)
+    combustion = Combustion(oxidiser, constants.time_step)
     thermochemical = Thermochemical()
-    nozzle = Nozzle(thermochemical.get_mixture(), nozzle_dims)
+    nozzle = Nozzle(thermochemical.get_mixture())
     
     time = 0 * constants.ureg.sec
 
@@ -72,15 +63,16 @@ def simulate(ideal, external_temp, nozzle_dims=None):
                 }
             )
 
-            impulse += nozzle.thrust(average_total_mass_flow_rate).to(constants.ureg.newton) * time_step
+            impulse += nozzle.thrust(average_total_mass_flow_rate).to(constants.ureg.newton) * constants.time_step
 
-            time += time_step
+            time += constants.time_step
 
             count += 1
     except Exception as e:
         print('Error: {}'.format(e))
 
         raise e
+
     finally:
         data = pd.DataFrame(raw_data)
         
@@ -112,11 +104,11 @@ def simulate(ideal, external_temp, nozzle_dims=None):
         
         pdf.write(5, '\nOxidiser:\n\n')
 
-        pdf.write(5, 'Initial Volume: {0:.2f}\n'.format(initial_oxidiser_volume.to(constants.ureg.liter)))
+        pdf.write(5, 'Initial Volume: {0:.2f}\n'.format(constants.initial_oxidiser_volume.to(constants.ureg.liter)))
 
         oxidiser_density = constants.n2o_density[external_temp.to(constants.ureg.degF).magnitude]
 
-        initial_oxi_mass = initial_oxidiser_volume * oxidiser_density
+        initial_oxi_mass = constants.initial_oxidiser_volume * oxidiser_density
 
         pdf.write(5, 'Initial Mass: {} lbs\n\n'.format(round(initial_oxi_mass.to(constants.ureg.lb).magnitude, 2)))
               
@@ -127,7 +119,7 @@ def simulate(ideal, external_temp, nozzle_dims=None):
 
         pdf.write(5, 'External Temp: {}\n'.format(external_temp.to(constants.ureg.degF)))
 
-        pdf.write(5, 'Time Step: {}\n'.format(time_step.to_base_units()))
+        pdf.write(5, 'Time Step: {}\n'.format(constants.time_step.to_base_units()))
 
         pdf.write(5, '\nSimulation Results:\n\n')
 
@@ -156,11 +148,11 @@ def simulate(ideal, external_temp, nozzle_dims=None):
 
         pdf.write(5, '\nFuel Grain\n\n')
 
-        pdf.write(5, 'Port Length: {}\n'.format(port_length.to(constants.ureg.inches)))
+        pdf.write(5, 'Port Length: {}\n'.format(constants.port_length.to(constants.ureg.inches)))
         pdf.write(5, 'Fuel Density: {0:.2f}\n'.format(constants.fuel_density.to(constants.ureg.kg / (constants.ureg.m ** 3))))
 
         pdf.write(5, '\nGrain Diameter: {0:.2f}\n'.format(round(constants.grain_diameter.to(constants.ureg.inches), 3)))
-        pdf.write(5, 'Initial Port Diameter: {}\n'.format(initial_port_diameter.to(constants.ureg.inches)))
+        pdf.write(5, 'Initial Port Diameter: {}\n'.format(constants.initial_port_diameter.to(constants.ureg.inches)))
         pdf.write(5, 'Final Port Diameter: {} inch\n'.format(round(data['average port diameter (inch)'].iloc[-1], 3)))
 
         for column in data.columns.values:
@@ -195,12 +187,3 @@ if __name__ == "__main__":
         ideal=True,
         external_temp=external_temp
     )
-
-    # for temp in constants.n2o_density.keys():
-    #     external_temp = constants.ureg.Quantity(temp, constants.ureg.degF)
-
-    #     simulate(
-    #         ideal=False,
-    #         external_temp=external_temp,
-    #         nozzle_dims=nozzle_suggestion
-    #     )

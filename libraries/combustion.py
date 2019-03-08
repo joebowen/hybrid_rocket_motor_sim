@@ -4,9 +4,8 @@ import libraries.constants as constants
 
 
 class Combustion:
-    def __init__(self, initial_port_diameter, port_length, oxidiser, time_step):
-        self.average_port_diameter = initial_port_diameter
-        self.port_length = port_length
+    def __init__(self, oxidiser, time_step):
+        self.average_port_diameter = constants.initial_port_diameter
         self.oxidiser = oxidiser
         self.time_step = time_step
 
@@ -50,7 +49,7 @@ class Combustion:
         average_total_mass_flux = self.average_total_mass_flux_function().to_base_units()
         average_total_mass_flux_units = average_total_mass_flux.units
 
-        port_length = self.port_length.to_base_units()
+        port_length = constants.port_length.to_base_units()
         port_length_units = port_length.units
 
         self.average_regression_rate = constants.a * (average_total_mass_flux.magnitude ** constants.n) * (port_length.magnitude ** constants.m)
@@ -71,7 +70,7 @@ class Combustion:
         """average_port_surface_area = self.average_port_diameter * math.pi *self.port_length
         """
 
-        average_port_surface_area = self.average_port_diameter * math.pi *self.port_length
+        average_port_surface_area = self.average_port_diameter * math.pi * constants.port_length
 
         return average_port_surface_area
 
