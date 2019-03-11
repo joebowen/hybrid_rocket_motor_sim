@@ -3,6 +3,8 @@ import pint
 
 ureg = pint.UnitRegistry()
 
+iteration_precision = 0.01
+
 throat_mach = 1
 
 nozzle_angle = 15 * ureg.degree
@@ -17,9 +19,10 @@ port_length = 13.4 * ureg.inches
 
 inlet_dia = 1.45 * ureg.inches 
 
-time_step = .01 * ureg.sec
+time_step = .001 * ureg.sec
 
-# Currently based on average ofRattWorks H70, I80, and I90 (N20 weight / burntime)
+# Currently based on average off RattWorks H70, I80, and I90 (N20 weight / burn time)
+# This should be a decent approximation given that it uses the same injector design
 injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
 
 num_of_injectors = 1
@@ -71,12 +74,14 @@ motor_codes = {
     'O': 40960 * ureg.newton * ureg.second
 }
 
+
 def get_motor_code(impulse):
     for code, impulse_limit in motor_codes.items():
         if impulse < impulse_limit:
             return code
     
     return '>O'
+
 
 def area_to_diameter(area):
     """diameter = sqrt(4 * area / pi)
@@ -94,5 +99,6 @@ def diameter_to_area(diameter):
     area = math.pi * (diameter ** 2)
 
     return area
+
 
 inlet_area = diameter_to_area(inlet_dia)

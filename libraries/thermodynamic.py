@@ -11,13 +11,13 @@ class Thermodynamic:
         return self.mixture.Cpg / self.mixture.Cvg
 
     def P(self):
-        return (self.mixture.P * (constants.ureg.Pa)).to_base_units()
+        return (self.mixture.P * constants.ureg.Pa).to_base_units()
 
     def R(self):
         return (self.mixture.R_specific * (constants.ureg.J / constants.ureg.kg / constants.ureg.K)).to_base_units()
 
     def T(self):
-        return (self.mixture.T * (constants.ureg.K)).to_base_units()
+        return (self.mixture.T * constants.ureg.K).to_base_units()
 
     def Cp(self):
         return (self.mixture.Cpg * (constants.ureg.J / constants.ureg.kg / constants.ureg.K)).to_base_units()

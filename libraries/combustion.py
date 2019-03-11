@@ -11,7 +11,12 @@ class Combustion:
 
         self.average_total_mass_flow_rate = self.oxidiser.mass_flow_rate_function()
 
-    def solve_for_average_total_mass_flow_rate(self, iteration_precision):
+        self.average_total_mass_flux = None
+        self.average_regression_rate = None
+        self.average_fuel_mass_flow_rate = None
+        self.oxi_fuel_ratio = None
+
+    def solve_for_average_total_mass_flow_rate(self):
         oxi_mass_flow_rate = self.oxidiser.mass_flow_rate_function()
 
         self.average_total_mass_flow_rate = oxi_mass_flow_rate
@@ -21,7 +26,7 @@ class Combustion:
         while True:
             self.average_total_mass_flow_rate = self.average_fuel_mass_flow_rate_function() + oxi_mass_flow_rate
 
-            if abs(self.average_total_mass_flow_rate - temp_average_total_mass_flow_rate).magnitude < iteration_precision:
+            if abs(self.average_total_mass_flow_rate - temp_average_total_mass_flow_rate).magnitude < constants.iteration_precision:
                 break
             else:
                 temp_average_total_mass_flow_rate = self.average_total_mass_flow_rate
