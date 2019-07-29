@@ -31,34 +31,34 @@ def simulate(ideal, external_temp):
 
     try:
         while combustion.average_total_mass_flow_rate > 0 * constants.ureg.kg / constants.ureg.sec:
-            combustion.solve_for_average_total_mass_flow_rate(iteration_precision=0.1)
+            combustion.solve_for_average_total_mass_flow_rate()
 
             average_total_mass_flow_rate = combustion.average_total_mass_flow_rate.to_base_units()
 
             raw_data.append(
                 {
                     'time ({0.units})'.format(time.to_base_units()): time.to_base_units().magnitude,
-                    'average total mass flow rate ({0.units})'.format(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)):round(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.seconds).magnitude, 3),
+                    'average total mass flow rate ({0.units})'.format(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)):round(average_total_mass_flow_rate.to(constants.ureg.kg / constants.ureg.seconds).magnitude, 10),
                     'average port diameter ({0.units})'.format(combustion.average_port_diameter.to(constants.ureg.inches)): round(combustion.average_port_diameter.to(constants.ureg.inches).magnitude, 4),
                     'average regression rate ({0.units})'.format(combustion.average_regression_rate.to(constants.ureg.inches / constants.ureg.second)): round(combustion.average_regression_rate.to(constants.ureg.inches / constants.ureg.second).magnitude / 100, 5),
                     'average fuel mass flow rate ({0.units})'.format(combustion.average_fuel_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)): round(combustion.average_fuel_mass_flow_rate.to(constants.ureg.kg / constants.ureg.second).magnitude, 7),
                     'oxidiser mass ({0.units})'.format(oxidiser.mass.to(constants.ureg.kg)): round(oxidiser.mass.to(constants.ureg.kg).magnitude, 4),
-                    'oxidiser mass flow rate ({0.units})'.format(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)): round(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second).magnitude, 4),
-                    'average total mass flux ({0.units})'.format(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second))): round(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second)).magnitude, 4),
+                    'oxidiser mass flow rate ({0.units})'.format(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second)): round(oxidiser.mass_flow_rate.to(constants.ureg.kg / constants.ureg.second).magnitude, 10),
+                    'average total mass flux ({0.units})'.format(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second))): round(combustion.average_total_mass_flux.to(constants.ureg.kg / ((constants.ureg.inches **2) * constants.ureg.second)).magnitude, 10),
                     'oxi fuel ratio': round(combustion.oxi_fuel_ratio_function().to_base_units().magnitude, 4),
                     'inlet velocity ({0.units})'.format(nozzle.inlet_velocity(average_total_mass_flow_rate).to(constants.ureg.mph)): round(nozzle.inlet_velocity(average_total_mass_flow_rate).to(constants.ureg.mph).magnitude, 4),
                     'inlet mach': round(nozzle.inlet_mach(average_total_mass_flow_rate).magnitude, 4),
-                    'nozzle throat area ({0.units})'.format(nozzle.throat_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2)): round(nozzle.throat_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2).magnitude, 4),
-                    'nozzle throat diameter ({0.units})'.format(nozzle.throat_diameter(average_total_mass_flow_rate).to(constants.ureg.inches)): round(nozzle.throat_diameter(average_total_mass_flow_rate).to(constants.ureg.inches).magnitude, 4),
-                    'nozzle naught temp ({0.units})'.format(nozzle.naught_temp(average_total_mass_flow_rate).to(constants.ureg.degF)): round(nozzle.naught_temp(average_total_mass_flow_rate).to(constants.ureg.degF).magnitude, 4),
-                    'nozzle star temp ({0.units})'.format(nozzle.star_temp(average_total_mass_flow_rate).to(constants.ureg.degF)): round(nozzle.star_temp(average_total_mass_flow_rate).to(constants.ureg.degF).magnitude, 4),
+                    'nozzle throat area ({0.units})'.format(nozzle.throat_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2)): round(nozzle.throat_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2).magnitude, 6),
+                    'nozzle throat diameter ({0.units})'.format(nozzle.throat_diameter(average_total_mass_flow_rate).to(constants.ureg.inches)): round(nozzle.throat_diameter(average_total_mass_flow_rate).to(constants.ureg.inches).magnitude, 6),
+                    'nozzle naught temp ({0.units})'.format(nozzle.naught_temp(average_total_mass_flow_rate).to(constants.ureg.degF)): round(nozzle.naught_temp(average_total_mass_flow_rate).to(constants.ureg.degF).magnitude, 10),
+                    'nozzle star temp ({0.units})'.format(nozzle.star_temp(average_total_mass_flow_rate).to(constants.ureg.degF)): round(nozzle.star_temp(average_total_mass_flow_rate).to(constants.ureg.degF).magnitude, 10),
                     'nozzle star pressure ({0.units})'.format(nozzle.star_pressure().to(constants.ureg.psi)): round(nozzle.star_pressure().to(constants.ureg.psi).magnitude, 4),
-                    'nozzle star velocity ({0.units})'.format(nozzle.star_velocity(average_total_mass_flow_rate).to(constants.ureg.mph)): round(nozzle.star_velocity(average_total_mass_flow_rate).to(constants.ureg.mph).magnitude, 4),
+                    'nozzle star velocity ({0.units})'.format(nozzle.star_velocity(average_total_mass_flow_rate).to(constants.ureg.mph)): round(nozzle.star_velocity(average_total_mass_flow_rate).to(constants.ureg.mph).magnitude, 10),
                     'nozzle star mach': round(nozzle.star_mach(average_total_mass_flow_rate).to_base_units().magnitude, 4),
                     'nozzle exit mach': round(nozzle.exit_mach(), 4),
                     'nozzle exit area ({0.units})'.format(nozzle.exit_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2)): round(nozzle.exit_area(average_total_mass_flow_rate).to(constants.ureg.inches ** 2).magnitude, 4),
                     'nozzle exit diameter ({0.units})'.format(nozzle.exit_diameter(average_total_mass_flow_rate).to(constants.ureg.inches)): round(nozzle.exit_diameter(average_total_mass_flow_rate).to(constants.ureg.inches).magnitude, 4),
-                    'nozzle nozzle diffuser length ({0.units})'.format(nozzle.nozzle_diffuser_length(average_total_mass_flow_rate).to(constants.ureg.inches)): round(nozzle.nozzle_diffuser_length(average_total_mass_flow_rate).to(constants.ureg.inches).magnitude, 4),
+                    'nozzle diffuser length ({0.units})'.format(nozzle.nozzle_diffuser_length(average_total_mass_flow_rate).to(constants.ureg.inches)): round(nozzle.nozzle_diffuser_length(average_total_mass_flow_rate).to(constants.ureg.inches).magnitude, 4),
                     'nozzle exit velocity ({0.units})'.format(nozzle.exit_velocity().to(constants.ureg.mph)): round(nozzle.exit_velocity().to(constants.ureg.mph).magnitude, 4),
                     'nozzle thrust ({0.units})'.format(nozzle.thrust(average_total_mass_flow_rate).to(constants.ureg.newton)): round(nozzle.thrust(average_total_mass_flow_rate).to(constants.ureg.newton).magnitude, 4)
                 }
@@ -138,7 +138,7 @@ def simulate(ideal, external_temp):
         nozzle_results = {
             'nozzle_throat_dia_avg': data['nozzle throat diameter (inch)'].iloc[:-2].mean() * constants.ureg.inches,
             'nozzle_exit_dia_avg': data['nozzle exit diameter (inch)'].iloc[:-2].mean() * constants.ureg.inches,
-            'nozzle_diffuser_len_avg': data['nozzle nozzle diffuser length (inch)'].iloc[:-2].mean() * constants.ureg.inches
+            'nozzle_diffuser_len_avg': data['nozzle diffuser length (inch)'].iloc[:-2].mean() * constants.ureg.inches
         }
 
         pdf.write(5, '\nNozzle Results:\n\n')

@@ -3,6 +3,8 @@ import pint
 
 ureg = pint.UnitRegistry()
 
+iteration_precision = 0.01
+
 throat_mach = 1
 
 nozzle_angle = 15 * ureg.degree
@@ -17,7 +19,7 @@ port_length = 13.4 * ureg.inches
 
 inlet_dia = 1.45 * ureg.inches 
 
-time_step = .01 * ureg.sec
+time_step = .001 * ureg.sec
 
 # Currently based on average of RattWorks H70, I80, and I90 (N20 weight / burntime)
 # injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
