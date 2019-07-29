@@ -62,7 +62,7 @@ class Nozzle:
         """naught_temp =  + ((inlet_velocity ** 2) / (2 * Cp()))
         """
 
-        naught_temp =  (
+        naught_temp = (
             self.combustion_thermo.T() + 
             (
                 (
@@ -211,5 +211,3 @@ class Nozzle:
         thrust = total_mass_flow_rate * (self.exit_velocity() - self.inlet_velocity(total_mass_flow_rate))
 
         return thrust
-
-    

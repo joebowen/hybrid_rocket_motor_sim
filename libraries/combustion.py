@@ -16,15 +16,13 @@ class Combustion:
 
         self.average_total_mass_flow_rate = oxi_mass_flow_rate
 
-        temp_average_total_mass_flow_rate = self.average_total_mass_flow_rate
-
         while True:
+            temp_average_total_mass_flow_rate = self.average_total_mass_flow_rate
+
             self.average_total_mass_flow_rate = self.average_fuel_mass_flow_rate_function() + oxi_mass_flow_rate
 
             if abs(self.average_total_mass_flow_rate - temp_average_total_mass_flow_rate).magnitude < iteration_precision:
                 break
-            else:
-                temp_average_total_mass_flow_rate = self.average_total_mass_flow_rate
 
         self.average_port_diameter += 2 * self.average_regression_rate * self.time_step / 100
 

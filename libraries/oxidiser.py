@@ -1,3 +1,5 @@
+from thermo.mixture import Mixture
+
 import libraries.constants as constants
 
 
@@ -15,6 +17,9 @@ class Oxidiser:
             self.mass_flow_rate = 0 * constants.ureg.kg / constants.ureg.sec
 
         return self.mass_flow_rate
-        
-    def n2o_density(self, external_temp):    
-        return constants.n2o_density[external_temp.to(constants.ureg.degF).magnitude]
+
+    @staticmethod
+    def n2o_density(external_temp):
+        n2o = Mixture(['n2o'], Vfls=[1], T=external_temp.to(constants.ureg.degK).magnitude)
+
+        return (n2o.rhol * (constants.ureg.kg / (constants.ureg.m ** 3))).to_base_units()

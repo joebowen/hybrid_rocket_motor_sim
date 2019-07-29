@@ -19,8 +19,14 @@ inlet_dia = 1.45 * ureg.inches
 
 time_step = .01 * ureg.sec
 
-# Currently based on average ofRattWorks H70, I80, and I90 (N20 weight / burntime)
-injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
+# Currently based on average of RattWorks H70, I80, and I90 (N20 weight / burntime)
+# injector_mass_flow_rate = 0.042 * ureg.kg / ureg.sec
+
+# Based on hybrid motor test #1 (8.75 sec burn time)
+# injector_mass_flow_rate = 0.068 * ureg.kg / ureg.sec
+
+# Based on hybrid motor test #2 (11.77 sec burn time)
+injector_mass_flow_rate = 0.0274 * ureg.kg / ureg.sec
 
 num_of_injectors = 1
 grain_diameter = 1.75 * ureg.inches
@@ -30,23 +36,6 @@ n = 0.65
 m = -0.2
 
 fuel_density = 3.957 * ureg.kg / (ureg.m ** 3)
-
-n2o_density = {
-    20: 948.3 * ureg.kg / (ureg.m ** 3),
-    32: 913.1 * ureg.kg / (ureg.m ** 3),
-    40: 876.2 * ureg.kg / (ureg.m ** 3),
-    45: 857.0 * ureg.kg / (ureg.m ** 3),
-    50: 837.8 * ureg.kg / (ureg.m ** 3),
-    55: 813.7 * ureg.kg / (ureg.m ** 3),
-    60: 788.1 * ureg.kg / (ureg.m ** 3),
-    65: 767.3 * ureg.kg / (ureg.m ** 3),
-    70: 744.9 * ureg.kg / (ureg.m ** 3),
-    75: 704.8 * ureg.kg / (ureg.m ** 3),
-    80: 656.8 * ureg.kg / (ureg.m ** 3),
-    85: 608.7 * ureg.kg / (ureg.m ** 3),
-    90: 544.6 * ureg.kg / (ureg.m ** 3),
-    97: 424.5 * ureg.kg / (ureg.m ** 3)
-}
 
 ideal_OF_ratio = 4.83
 
@@ -71,12 +60,14 @@ motor_codes = {
     'O': 40960 * ureg.newton * ureg.second
 }
 
+
 def get_motor_code(impulse):
     for code, impulse_limit in motor_codes.items():
         if impulse < impulse_limit:
             return code
     
     return '>O'
+
 
 def area_to_diameter(area):
     """diameter = sqrt(4 * area / pi)
@@ -94,5 +85,6 @@ def diameter_to_area(diameter):
     area = math.pi * (diameter ** 2)
 
     return area
+
 
 inlet_area = diameter_to_area(inlet_dia)

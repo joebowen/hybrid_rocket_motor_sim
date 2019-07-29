@@ -14,6 +14,7 @@ from libraries.thermochemical import Thermochemical
 
 pd.set_option('display.max_columns', 500)
 
+
 def simulate(ideal, external_temp):
     oxidiser = Oxidiser(external_temp)
     combustion = Combustion(oxidiser, constants.time_step)
@@ -106,7 +107,7 @@ def simulate(ideal, external_temp):
 
         pdf.write(5, 'Initial Volume: {0:.2f}\n'.format(constants.initial_oxidiser_volume.to(constants.ureg.liter)))
 
-        oxidiser_density = constants.n2o_density[external_temp.to(constants.ureg.degF).magnitude]
+        oxidiser_density = oxidiser.n2o_density(external_temp)
 
         initial_oxi_mass = constants.initial_oxidiser_volume * oxidiser_density
 
@@ -181,9 +182,7 @@ def simulate(ideal, external_temp):
 
 
 if __name__ == "__main__":
-    external_temp = constants.ureg.Quantity(70, constants.ureg.degF)
-
     nozzle_suggestion = simulate(
         ideal=True,
-        external_temp=external_temp
+        external_temp=constants.ureg.Quantity(70, constants.ureg.degF)
     )
